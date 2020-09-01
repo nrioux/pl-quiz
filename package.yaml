@@ -41,6 +41,7 @@ executables:
     - wai
     - warp
     - directory
+    - aeson
 
 tests:
   QuizServer-test:

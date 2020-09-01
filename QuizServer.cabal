@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 045c6b79b0fff1f94a9dd2301c0262f3b21dd1b8b90b2b55e2cfc884f0c327a9
+-- hash: 77151e77a5837cd1b6e40f866f39dfffa2b08705cb1b375a09ba7891ed981efe
 
 name:           QuizServer
 version:        0.1.0.0
@@ -45,6 +45,7 @@ executable QuizServer-exe
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       QuizServer
+    , aeson
     , base >=4.7 && <5
     , directory
     , servant-server
