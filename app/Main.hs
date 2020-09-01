@@ -16,9 +16,7 @@ staticAPI :: Proxy StaticAPI
 staticAPI = Proxy
 
 server :: Server StaticAPI
--- server = serveDirectoryWebApp "static-files"
--- server = serveDirectoryFileServer "/app/static-files"
-server = serveDirectoryFileServer "/"
+server = serveDirectoryWebApp "static-files"
 
 app :: Application
 app = serve staticAPI server
