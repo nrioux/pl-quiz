@@ -17,7 +17,8 @@ staticAPI = Proxy
 
 server :: Server StaticAPI
 -- server = serveDirectoryWebApp "static-files"
-server = serveDirectoryFileServer "/app/static-files"
+-- server = serveDirectoryFileServer "/app/static-files"
+server = serveDirectoryFileServer "/"
 
 app :: Application
 app = serve staticAPI server
@@ -28,5 +29,5 @@ main = do
   portStr <- getEnv "PORT"
   let port = read portStr
   putStrLn $ "CD: " ++ cd
-  putStrLn "Running server: http://localhost:8081"
+  putStrLn $ "Running server: http://localhost:" ++ (show port)
   run port app
