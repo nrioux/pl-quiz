@@ -6,6 +6,7 @@ import Network.Wai
 import Network.Wai.Handler.Warp
 import Servant
 import System.Directory
+import System.Environment
 
 import Lib
 
@@ -24,6 +25,8 @@ app = serve staticAPI server
 main :: IO ()
 main = do
   cd <- getCurrentDirectory
+  portStr <- getEnv "PORT"
+  let port = read portStr
   putStrLn $ "CD: " ++ cd
   putStrLn "Running server: http://localhost:8081"
-  run 8081 app
+  run port app
