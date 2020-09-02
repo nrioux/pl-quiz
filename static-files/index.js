@@ -11711,20 +11711,32 @@ var PS = {};
   "use strict";
   $PS["Scoreboard"] = $PS["Scoreboard"] || {};
   var exports = $PS["Scoreboard"];
+  var Control_Monad_State_Class = $PS["Control.Monad.State.Class"];
   var Data_Array = $PS["Data.Array"];
   var Data_List = $PS["Data.List"];
   var Data_List_Types = $PS["Data.List.Types"];
+  var Data_Maybe = $PS["Data.Maybe"];
   var Data_Semigroup = $PS["Data.Semigroup"];
   var Data_Show = $PS["Data.Show"];
   var Halogen_Component = $PS["Halogen.Component"];
   var Halogen_HTML_Core = $PS["Halogen.HTML.Core"];
   var Halogen_HTML_Elements = $PS["Halogen.HTML.Elements"];
-  var Halogen_HTML_Properties = $PS["Halogen.HTML.Properties"];                
-  var comp = function (dictShow) {
+  var Halogen_HTML_Properties = $PS["Halogen.HTML.Properties"];
+  var Halogen_Query_HalogenM = $PS["Halogen.Query.HalogenM"];                
+  var Receive = (function () {
+      function Receive(value0) {
+          this.value0 = value0;
+      };
+      Receive.create = function (value0) {
+          return new Receive(value0);
+      };
+      return Receive;
+  })();
+  var comp = (function () {
       var render = function (v) {
           var renderRow = function (i) {
               return function (score) {
-                  return Halogen_HTML_Elements.tr_([ Halogen_HTML_Elements.td_([ Halogen_HTML_Core.text(Data_Show.show(Data_Show.showInt)(i)) ]), Halogen_HTML_Elements.td_([ Halogen_HTML_Core.text(score.team.name) ]), Halogen_HTML_Elements.td_([ Halogen_HTML_Core.text(Data_Show.show(dictShow)(score.score)) ]) ]);
+                  return Halogen_HTML_Elements.tr_([ Halogen_HTML_Elements.td_([ Halogen_HTML_Core.text(Data_Show.show(Data_Show.showInt)(i)) ]), Halogen_HTML_Elements.td_([ Halogen_HTML_Core.text(score.team.name) ]), Halogen_HTML_Elements.td_([ Halogen_HTML_Core.text(Data_Show.show(Data_Show.showInt)(score.score)) ]) ]);
               };
           };
           var rows = Data_Array.fromFoldable(Data_List_Types.foldableList)(Data_List.mapWithIndex(renderRow)(v.scores));
@@ -11733,12 +11745,23 @@ var PS = {};
       var initialState = function (s) {
           return s;
       };
+      var handleAction = function (v) {
+          return Control_Monad_State_Class.put(Halogen_Query_HalogenM.monadStateHalogenM)(v.value0);
+      };
       return Halogen_Component.mkComponent({
           initialState: initialState,
           render: render,
-          "eval": Halogen_Component.mkEval(Halogen_Component.defaultEval)
+          "eval": Halogen_Component.mkEval({
+              handleAction: handleAction,
+              handleQuery: Halogen_Component.defaultEval.handleQuery,
+              receive: function ($7) {
+                  return Data_Maybe.Just.create(Receive.create($7));
+              },
+              initialize: Halogen_Component.defaultEval.initialize,
+              finalize: Halogen_Component.defaultEval.finalize
+          })
       });
-  };
+  })();
   exports["comp"] = comp;
 })(PS);
 (function($PS) {
@@ -11756,7 +11779,6 @@ var PS = {};
   var Data_Functor = $PS["Data.Functor"];
   var Data_Maybe = $PS["Data.Maybe"];
   var Data_Ord = $PS["Data.Ord"];
-  var Data_Show = $PS["Data.Show"];
   var Data_Symbol = $PS["Data.Symbol"];
   var Data_Unit = $PS["Data.Unit"];
   var Data_Void = $PS["Data.Void"];
@@ -11898,7 +11920,8 @@ var PS = {};
       var render = function (v) {
           var scoreboard = Halogen_HTML.slot()(new Data_Symbol.IsSymbol(function () {
               return "scoreboard";
-          }))(Data_Ord.ordInt)(Data_Symbol.SProxy.value)(0)(Scoreboard.comp(Data_Show.showInt))({
+          }))(Data_Ord.ordInt)(Data_Symbol.SProxy.value)(0)(Scoreboard.comp)({
+              id: v.id,
               scores: v.scores
           })(Data_Void.absurd);
           var qui = Data_Maybe.fromMaybe(Halogen_HTML_Core.text("Error."))(Control_Bind.bind(Data_Maybe.bindMaybe)(Data_Array.index(v.questions)(v.page))(function (question) {
@@ -11909,8 +11932,8 @@ var PS = {};
                   question: question,
                   algos: algos,
                   langs: langs
-              })(function ($41) {
-                  return Data_Maybe.Just.create(ResponseEvent.create($41));
+              })(function ($44) {
+                  return Data_Maybe.Just.create(ResponseEvent.create($44));
               }));
           }));
           var nav = Halogen_HTML.slot()(new Data_Symbol.IsSymbol(function () {
@@ -11918,8 +11941,8 @@ var PS = {};
           }))(Data_Ord.ordInt)(Data_Symbol.SProxy.value)(0)(Nav.navComp)({
               page: v.page,
               questions: v.questions
-          })(function ($42) {
-              return Data_Maybe.Just.create(NavEvent.create($42));
+          })(function ($45) {
+              return Data_Maybe.Just.create(NavEvent.create($45));
           });
           return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("container") ])([ Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("row") ])([ Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("col-7") ])([ qui, scoreboard ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("col-5") ])([ Halogen_HTML_Elements.h2_([ Halogen_HTML_Core.text("Questions") ]), nav ]) ]) ]);
       };
@@ -11927,20 +11950,21 @@ var PS = {};
           return {
               page: 0,
               questions: initialQuestions,
+              id: v.id,
               scores: v.scores
           };
       };
       var handleAction = function (v) {
           if (v instanceof NavEvent) {
               return Control_Monad_State_Class.modify_(Halogen_Query_HalogenM.monadStateHalogenM)(function (state) {
-                  var $19 = {};
-                  for (var $20 in state) {
-                      if ({}.hasOwnProperty.call(state, $20)) {
-                          $19[$20] = state[$20];
+                  var $21 = {};
+                  for (var $22 in state) {
+                      if ({}.hasOwnProperty.call(state, $22)) {
+                          $21[$22] = state[$22];
                       };
                   };
-                  $19.page = v.value0.value0;
-                  return $19;
+                  $21.page = v.value0.value0;
+                  return $21;
               });
           };
           if (v instanceof ResponseEvent && v.value0 instanceof QuestionUI.Submit) {
@@ -11948,6 +11972,7 @@ var PS = {};
                   return Data_Maybe.fromMaybe({
                       page: v1.page,
                       questions: v1.questions,
+                      id: v1.id,
                       scores: v1.scores
                   })(Control_Bind.bind(Data_Maybe.bindMaybe)(Data_Array.index(v1.questions)(v1.page))(function (question) {
                       return Control_Bind.bind(Data_Maybe.bindMaybe)(moveNextPage(v1.questions)(v1.page))(function (nextPage) {
@@ -11957,6 +11982,7 @@ var PS = {};
                               return new Data_Maybe.Just({
                                   page: nextPage,
                                   questions: newQuestions,
+                                  id: v1.id,
                                   scores: v1.scores
                               });
                           });
@@ -11969,14 +11995,14 @@ var PS = {};
                   var newQuestions = trySetResponse(state.page)(v.value0.value0)(state.questions);
                   if (newQuestions instanceof Data_Maybe.Just) {
                       return Control_Monad_State_Class.put(Halogen_Query_HalogenM.monadStateHalogenM)((function () {
-                          var $30 = {};
-                          for (var $31 in state) {
-                              if ({}.hasOwnProperty.call(state, $31)) {
-                                  $30[$31] = state[$31];
+                          var $33 = {};
+                          for (var $34 in state) {
+                              if ({}.hasOwnProperty.call(state, $34)) {
+                                  $33[$34] = state[$34];
                               };
                           };
-                          $30.questions = newQuestions.value0;
-                          return $30;
+                          $33.questions = newQuestions.value0;
+                          return $33;
                       })());
                   };
                   if (newQuestions instanceof Data_Maybe.Nothing) {
@@ -11987,14 +12013,14 @@ var PS = {};
           };
           if (v instanceof Receive) {
               return Control_Monad_State_Class.modify_(Halogen_Query_HalogenM.monadStateHalogenM)(function (state) {
-                  var $36 = {};
-                  for (var $37 in state) {
-                      if ({}.hasOwnProperty.call(state, $37)) {
-                          $36[$37] = state[$37];
+                  var $39 = {};
+                  for (var $40 in state) {
+                      if ({}.hasOwnProperty.call(state, $40)) {
+                          $39[$40] = state[$40];
                       };
                   };
-                  $36.scores = v.value0.scores;
-                  return $36;
+                  $39.scores = v.value0.scores;
+                  return $39;
               });
           };
           throw new Error("Failed pattern match at Quiz (line 93, column 3 - line 93, column 98): " + [ v.constructor.name ]);
@@ -12005,8 +12031,8 @@ var PS = {};
           "eval": Halogen_Component.mkEval({
               handleAction: handleAction,
               handleQuery: Halogen_Component.defaultEval.handleQuery,
-              receive: function ($43) {
-                  return Data_Maybe.Just.create(Receive.create($43));
+              receive: function ($46) {
+                  return Data_Maybe.Just.create(Receive.create($46));
               },
               initialize: Halogen_Component.defaultEval.initialize,
               finalize: Halogen_Component.defaultEval.finalize
@@ -12089,8 +12115,8 @@ var PS = {};
       });
       var render = function (v) {
           if (!v.joined) {
-              return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("container") ])([ Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("row") ])([ Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("col-7") ])([ Halogen_HTML_Elements.h2_([ Halogen_HTML_Core.text("Join Game") ]), Halogen_HTML_Elements.form([ Halogen_HTML_Events.onSubmit(Data_Function["const"](new Data_Maybe.Just(Join.value))), Halogen_HTML_Properties.action("#") ])([ Halogen_HTML_Elements.label_([ Halogen_HTML_Core.text("Group Name: "), Halogen_HTML_Elements.input([ Halogen_HTML_Properties.type_(Halogen_HTML_Core.isPropInputType)(DOM_HTML_Indexed_InputType.InputText.value), Halogen_HTML_Events.onValueInput(function ($30) {
-                  return Data_Maybe.Just.create(SetName.create($30));
+              return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("container") ])([ Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("row") ])([ Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("col-7") ])([ Halogen_HTML_Elements.h2_([ Halogen_HTML_Core.text("Join Game") ]), Halogen_HTML_Elements.form([ Halogen_HTML_Events.onSubmit(Data_Function["const"](new Data_Maybe.Just(Join.value))), Halogen_HTML_Properties.action("#") ])([ Halogen_HTML_Elements.label_([ Halogen_HTML_Core.text("Group Name: "), Halogen_HTML_Elements.input([ Halogen_HTML_Properties.type_(Halogen_HTML_Core.isPropInputType)(DOM_HTML_Indexed_InputType.InputText.value), Halogen_HTML_Events.onValueInput(function ($31) {
+                  return Data_Maybe.Just.create(SetName.create($31));
               }) ]) ]), Halogen_HTML_Elements.br_, Halogen_HTML_Elements.button([ Halogen_HTML_Properties.classes([ "btn", "btn-primary" ]), Halogen_HTML_Properties.type_(Halogen_HTML_Core.isPropButtonType)(DOM_HTML_Indexed_ButtonType.ButtonSubmit.value) ])([ Halogen_HTML_Core.text("Join") ]) ]) ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("col-5") ])([  ]) ]) ]);
           };
           var quiz = Halogen_HTML.slot()(new Data_Symbol.IsSymbol(function () {
@@ -12124,19 +12150,25 @@ var PS = {};
               });
           };
           if (v instanceof Join) {
-              return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.modify_(Halogen_Query_HalogenM.monadStateHalogenM)(function (state) {
-                  var $18 = {};
-                  for (var $19 in state) {
-                      if ({}.hasOwnProperty.call(state, $19)) {
-                          $18[$19] = state[$19];
-                      };
+              return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.get(Halogen_Query_HalogenM.monadStateHalogenM))(function (state) {
+                  var $18 = state.name !== "";
+                  if ($18) {
+                      return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.put(Halogen_Query_HalogenM.monadStateHalogenM)((function () {
+                          var $19 = {};
+                          for (var $20 in state) {
+                              if ({}.hasOwnProperty.call(state, $20)) {
+                                  $19[$20] = state[$20];
+                              };
+                          };
+                          $19.joined = true;
+                          return $19;
+                      })()))(function () {
+                          return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Halogen_Query_HalogenM.subscribe(timer))(function () {
+                              return handleAction(Tick.value);
+                          });
+                      });
                   };
-                  $18.joined = true;
-                  return $18;
-              }))(function () {
-                  return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Halogen_Query_HalogenM.subscribe(timer))(function () {
-                      return handleAction(Tick.value);
-                  });
+                  return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(Data_Unit.unit);
               });
           };
           if (v instanceof Tick) {
@@ -12170,21 +12202,21 @@ var PS = {};
                                       return "name";
                                   }))(Data_Show.showRecordFieldsNil)(Data_Show.showString))(Data_Show.showInt))))(Data_Show.showInt))))(Data_Map_Internal.values(decoded.value0))))(function () {
                                       return Control_Monad_State_Class.modify_(Halogen_Query_HalogenM.monadStateHalogenM)(function (state) {
-                                          var $25 = {};
-                                          for (var $26 in state) {
-                                              if ({}.hasOwnProperty.call(state, $26)) {
-                                                  $25[$26] = state[$26];
+                                          var $26 = {};
+                                          for (var $27 in state) {
+                                              if ({}.hasOwnProperty.call(state, $27)) {
+                                                  $26[$27] = state[$27];
                                               };
                                           };
-                                          $25.scores = Data_Map_Internal.values(decoded.value0);
-                                          return $25;
+                                          $26.scores = Data_Map_Internal.values(decoded.value0);
+                                          return $26;
                                       });
                                   });
                               });
                           };
-                          throw new Error("Failed pattern match at Main (line 88, column 9 - line 94, column 71): " + [ decoded.constructor.name ]);
+                          throw new Error("Failed pattern match at Main (line 93, column 9 - line 99, column 71): " + [ decoded.constructor.name ]);
                       };
-                      throw new Error("Failed pattern match at Main (line 84, column 5 - line 94, column 71): " + [ result.constructor.name ]);
+                      throw new Error("Failed pattern match at Main (line 89, column 5 - line 99, column 71): " + [ result.constructor.name ]);
                   });
               });
           };
