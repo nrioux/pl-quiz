@@ -11726,7 +11726,7 @@ var PS = {};
           })(function ($34) {
               return Data_Maybe.Just.create(NavEvent.create($34));
           });
-          return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("container") ])([ Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("row") ])([ Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("col-7") ])([ qui ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("col-5") ])([ Halogen_HTML_Elements.h2_([ Halogen_HTML_Core.text("Questions") ]), nav ]) ]) ]);
+          return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("container") ])([ Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("row") ])([ Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("col-7") ])([ qui, scoreboard ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("col-5") ])([ Halogen_HTML_Elements.h2_([ Halogen_HTML_Core.text("Questions") ]), nav ]) ]) ]);
       };
       var initialState = function (v) {
           return {
