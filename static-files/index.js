@@ -8070,6 +8070,13 @@ var PS = {};
 (function(exports) {
   "use strict";
 
+  exports.log = function (s) {
+    return function () {
+      console.log(s);
+      return {};
+    };
+  };
+
   exports.warn = function (s) {
     return function () {
       console.warn(s);
@@ -8083,6 +8090,7 @@ var PS = {};
   $PS["Effect.Console"] = $PS["Effect.Console"] || {};
   var exports = $PS["Effect.Console"];
   var $foreign = $PS["Effect.Console"];
+  exports["log"] = $foreign.log;
   exports["warn"] = $foreign.warn;
 })(PS);
 (function(exports) {
@@ -8593,6 +8601,7 @@ var PS = {};
   exports["functorHalogenM"] = functorHalogenM;
   exports["applicativeHalogenM"] = applicativeHalogenM;
   exports["bindHalogenM"] = bindHalogenM;
+  exports["monadEffectHalogenM"] = monadEffectHalogenM;
   exports["monadAffHalogenM"] = monadAffHalogenM;
   exports["monadStateHalogenM"] = monadStateHalogenM;
   exports["ordSubscriptionId"] = ordSubscriptionId;
@@ -11831,6 +11840,8 @@ var PS = {};
   var Data_Void = $PS["Data.Void"];
   var Effect_Aff = $PS["Effect.Aff"];
   var Effect_Aff_Class = $PS["Effect.Aff.Class"];
+  var Effect_Class = $PS["Effect.Class"];
+  var Effect_Console = $PS["Effect.Console"];
   var Effect_Exception = $PS["Effect.Exception"];
   var Halogen_Aff_Util = $PS["Halogen.Aff.Util"];
   var Halogen_Component = $PS["Halogen.Component"];
@@ -11927,41 +11938,45 @@ var PS = {};
               });
           };
           if (v instanceof Tick) {
-              return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Effect_Aff_Class.liftAff(Halogen_Query_HalogenM.monadAffHalogenM(dictMonadAff))(Affjax.get(Affjax_ResponseFormat.json)("/score")))(function (result) {
-                  if (result instanceof Data_Either.Left) {
-                      return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(Data_Unit.unit);
-                  };
-                  if (result instanceof Data_Either.Right) {
-                      var decoded = Data_Argonaut_Decode_Class.decodeJson(Data_Argonaut_Decode_Class.decodeMap(Data_Ord.ordInt)(Data_Argonaut_Decode_Class.decodeJsonInt)(Data_Argonaut_Decode_Class.decodeRecord(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeJsonInt)(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeRecord(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeJsonInt)(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeJsonString)(Data_Argonaut_Decode_Class.gDecodeJsonNil)(new Data_Symbol.IsSymbol(function () {
-                          return "name";
-                      }))()())(new Data_Symbol.IsSymbol(function () {
-                          return "key";
-                      }))()())())(Data_Argonaut_Decode_Class.gDecodeJsonNil)(new Data_Symbol.IsSymbol(function () {
-                          return "team";
-                      }))()())(new Data_Symbol.IsSymbol(function () {
-                          return "score";
-                      }))()())()))(result.value0.body);
-                      if (decoded instanceof Data_Either.Left) {
+              return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Effect_Class.liftEffect(Halogen_Query_HalogenM.monadEffectHalogenM(dictMonadAff.MonadEffect0()))(Effect_Console.log("TICK")))(function () {
+                  return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Effect_Aff_Class.liftAff(Halogen_Query_HalogenM.monadAffHalogenM(dictMonadAff))(Affjax.get(Affjax_ResponseFormat.json)("/score")))(function (result) {
+                      if (result instanceof Data_Either.Left) {
                           return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(Data_Unit.unit);
                       };
-                      if (decoded instanceof Data_Either.Right) {
-                          return Control_Monad_State_Class.modify_(Halogen_Query_HalogenM.monadStateHalogenM)(function (state) {
-                              var $25 = {};
-                              for (var $26 in state) {
-                                  if ({}.hasOwnProperty.call(state, $26)) {
-                                      $25[$26] = state[$26];
-                                  };
-                              };
-                              $25.scores = Data_Map_Internal.values(decoded.value0);
-                              return $25;
-                          });
+                      if (result instanceof Data_Either.Right) {
+                          var decoded = Data_Argonaut_Decode_Class.decodeJson(Data_Argonaut_Decode_Class.decodeMap(Data_Ord.ordInt)(Data_Argonaut_Decode_Class.decodeJsonInt)(Data_Argonaut_Decode_Class.decodeRecord(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeJsonInt)(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeRecord(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeJsonInt)(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeJsonString)(Data_Argonaut_Decode_Class.gDecodeJsonNil)(new Data_Symbol.IsSymbol(function () {
+                              return "name";
+                          }))()())(new Data_Symbol.IsSymbol(function () {
+                              return "key";
+                          }))()())())(Data_Argonaut_Decode_Class.gDecodeJsonNil)(new Data_Symbol.IsSymbol(function () {
+                              return "team";
+                          }))()())(new Data_Symbol.IsSymbol(function () {
+                              return "score";
+                          }))()())()))(result.value0.body);
+                          if (decoded instanceof Data_Either.Left) {
+                              return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(Data_Unit.unit);
+                          };
+                          if (decoded instanceof Data_Either.Right) {
+                              return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Effect_Class.liftEffect(Halogen_Query_HalogenM.monadEffectHalogenM(dictMonadAff.MonadEffect0()))(Effect_Console.log("decoded response")))(function () {
+                                  return Control_Monad_State_Class.modify_(Halogen_Query_HalogenM.monadStateHalogenM)(function (state) {
+                                      var $25 = {};
+                                      for (var $26 in state) {
+                                          if ({}.hasOwnProperty.call(state, $26)) {
+                                              $25[$26] = state[$26];
+                                          };
+                                      };
+                                      $25.scores = Data_Map_Internal.values(decoded.value0);
+                                      return $25;
+                                  });
+                              });
+                          };
+                          throw new Error("Failed pattern match at Main (line 88, column 9 - line 93, column 71): " + [ decoded.constructor.name ]);
                       };
-                      throw new Error("Failed pattern match at Main (line 86, column 9 - line 88, column 106): " + [ decoded.constructor.name ]);
-                  };
-                  throw new Error("Failed pattern match at Main (line 82, column 5 - line 88, column 106): " + [ result.constructor.name ]);
+                      throw new Error("Failed pattern match at Main (line 84, column 5 - line 93, column 71): " + [ result.constructor.name ]);
+                  });
               });
           };
-          throw new Error("Failed pattern match at Main (line 75, column 3 - line 75, column 74): " + [ v.constructor.name ]);
+          throw new Error("Failed pattern match at Main (line 76, column 3 - line 76, column 74): " + [ v.constructor.name ]);
       };
       return Halogen_Component.mkComponent({
           initialState: initialState,
