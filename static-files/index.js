@@ -5307,6 +5307,7 @@ var PS = {};
   "use strict";
   $PS["Common"] = $PS["Common"] || {};
   var exports = $PS["Common"];
+  var Data_Foldable = $PS["Data.Foldable"];                
   var Unsubmitted = (function () {
       function Unsubmitted() {
 
@@ -5330,7 +5331,7 @@ var PS = {};
       if (v.status instanceof Submitted) {
           return true;
       };
-      throw new Error("Failed pattern match at Common (line 12, column 1 - line 12, column 33): " + [ v.constructor.name ]);
+      throw new Error("Failed pattern match at Common (line 17, column 1 - line 17, column 33): " + [ v.constructor.name ]);
   };
   var score = function (response) {
       return function (sample) {
@@ -5351,9 +5352,17 @@ var PS = {};
           return algo + lang | 0;
       };
   };
+  var totalScore = function (questions) {
+      return Data_Foldable.foldl(Data_Foldable.foldableArray)(function (sum) {
+          return function (q) {
+              return sum + score(q.response)(q.sample) | 0;
+          };
+      })(0)(questions);
+  };
   exports["Unsubmitted"] = Unsubmitted;
   exports["Submitted"] = Submitted;
   exports["submitted"] = submitted;
+  exports["totalScore"] = totalScore;
   exports["score"] = score;
 })(PS);
 (function($PS) {
@@ -12253,8 +12262,8 @@ var PS = {};
       return function (resp) {
           return function (questions) {
               return Data_Array.modifyAt(page)(function (oldQuestion) {
-                  var $14 = Common.submitted(oldQuestion);
-                  if ($14) {
+                  var $13 = Common.submitted(oldQuestion);
+                  if ($13) {
                       return oldQuestion;
                   };
                   return {
@@ -12287,8 +12296,8 @@ var PS = {};
                       return function (q) {
                           var relBestIdx = Data_EuclideanRing.mod(Data_EuclideanRing.euclideanRingInt)((best.idx - page | 0) - 1 | 0)(Data_Array.length(questions));
                           var relIdx = Data_EuclideanRing.mod(Data_EuclideanRing.euclideanRingInt)((i - page | 0) - 1 | 0)(Data_Array.length(questions));
-                          var $15 = Common.submitted(q) || relBestIdx <= relIdx;
-                          if ($15) {
+                          var $14 = Common.submitted(q) || relBestIdx <= relIdx;
+                          if ($14) {
                               return best;
                           };
                           return {
@@ -12363,8 +12372,8 @@ var PS = {};
                   question: question,
                   algos: algos,
                   langs: langs
-              })(function ($60) {
-                  return Data_Maybe.Just.create(ResponseEvent.create($60));
+              })(function ($54) {
+                  return Data_Maybe.Just.create(ResponseEvent.create($54));
               }));
           }));
           var nav = Halogen_HTML.slot()(new Data_Symbol.IsSymbol(function () {
@@ -12372,8 +12381,8 @@ var PS = {};
           }))(Data_Ord.ordInt)(Data_Symbol.SProxy.value)(0)(Nav.navComp)({
               page: v.page,
               questions: v.questions
-          })(function ($61) {
-              return Data_Maybe.Just.create(NavEvent.create($61));
+          })(function ($55) {
+              return Data_Maybe.Just.create(NavEvent.create($55));
           });
           return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("container") ])([ Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("row") ])([ Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("col-7") ])([ qui, scoreboard ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("col-5") ])([ Halogen_HTML_Elements.h2_([ Halogen_HTML_Core.text("Questions") ]), nav ]) ]) ]);
       };
@@ -12388,26 +12397,23 @@ var PS = {};
       var handleAction = function (v) {
           if (v instanceof NavEvent) {
               return Control_Monad_State_Class.modify_(Halogen_Query_HalogenM.monadStateHalogenM)(function (state) {
-                  var $25 = {};
-                  for (var $26 in state) {
-                      if ({}.hasOwnProperty.call(state, $26)) {
-                          $25[$26] = state[$26];
+                  var $24 = {};
+                  for (var $25 in state) {
+                      if ({}.hasOwnProperty.call(state, $25)) {
+                          $24[$25] = state[$25];
                       };
                   };
-                  $25.page = v.value0.value0;
-                  return $25;
+                  $24.page = v.value0.value0;
+                  return $24;
               });
           };
           if (v instanceof ResponseEvent && v.value0 instanceof QuestionUI.Submit) {
               return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.get(Halogen_Query_HalogenM.monadStateHalogenM))(function (v1) {
-                  var v2 = Data_Maybe.fromMaybe({
-                      newState: {
-                          page: v1.page,
-                          questions: v1.questions,
-                          team: v1.team,
-                          scores: v1.scores
-                      },
-                      maybePoints: Data_Maybe.Nothing.value
+                  var newState = Data_Maybe.fromMaybe({
+                      page: v1.page,
+                      questions: v1.questions,
+                      team: v1.team,
+                      scores: v1.scores
                   })(Control_Bind.bind(Data_Maybe.bindMaybe)(Data_Array.index(v1.questions)(v1.page))(function (question) {
                       return Control_Bind.bind(Data_Maybe.bindMaybe)(moveNextPage(v1.questions)(v1.page))(function (nextPage) {
                           var points = Common.score(question.response)(question.sample);
@@ -12415,63 +12421,55 @@ var PS = {};
                               points: points
                           }))(v1.questions))(function (newQuestions) {
                               return Control_Applicative.pure(Data_Maybe.applicativeMaybe)({
-                                  newState: {
-                                      page: nextPage,
-                                      questions: newQuestions,
-                                      team: v1.team,
-                                      scores: v1.scores
-                                  },
-                                  maybePoints: new Data_Maybe.Just(points)
+                                  page: nextPage,
+                                  questions: newQuestions,
+                                  team: v1.team,
+                                  scores: v1.scores
                               });
                           });
                       });
                   }));
-                  if (v2.maybePoints instanceof Data_Maybe.Nothing) {
-                      return Control_Monad_State_Class.put(Halogen_Query_HalogenM.monadStateHalogenM)(v2.newState);
-                  };
-                  if (v2.maybePoints instanceof Data_Maybe.Just) {
-                      return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Effect_Aff_Class.liftAff(Halogen_Query_HalogenM.monadAffHalogenM(dictMonadAff))(Affjax.post(Affjax_ResponseFormat.json)("/score")(Data_Maybe.Just.create(Affjax_RequestBody.json(Data_Argonaut_Encode_Class.encodeJson(Data_Argonaut_Encode_Class.encodeRecord(Data_Argonaut_Encode_Class.gEncodeJsonCons(Data_Argonaut_Encode_Class.encodeJsonInt)(Data_Argonaut_Encode_Class.gEncodeJsonCons(Data_Argonaut_Encode_Class.encodeRecord(Data_Argonaut_Encode_Class.gEncodeJsonCons(Data_Argonaut_Encode_Class.encodeJsonInt)(Data_Argonaut_Encode_Class.gEncodeJsonCons(Data_Argonaut_Encode_Class.encodeJsonJString)(Data_Argonaut_Encode_Class.gEncodeJsonNil)(new Data_Symbol.IsSymbol(function () {
-                          return "name";
-                      }))())(new Data_Symbol.IsSymbol(function () {
-                          return "key";
-                      }))())())(Data_Argonaut_Encode_Class.gEncodeJsonNil)(new Data_Symbol.IsSymbol(function () {
-                          return "team";
-                      }))())(new Data_Symbol.IsSymbol(function () {
-                          return "score";
-                      }))())())({
-                          score: v2.maybePoints.value0,
-                          team: v1.team
-                      }))))))(function (resp) {
-                          if (resp instanceof Data_Either.Left) {
-                              return Control_Monad_State_Class.put(Halogen_Query_HalogenM.monadStateHalogenM)(v2.newState);
+                  var total = Common.totalScore(newState.questions);
+                  return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Effect_Aff_Class.liftAff(Halogen_Query_HalogenM.monadAffHalogenM(dictMonadAff))(Affjax.post(Affjax_ResponseFormat.json)("/score")(Data_Maybe.Just.create(Affjax_RequestBody.json(Data_Argonaut_Encode_Class.encodeJson(Data_Argonaut_Encode_Class.encodeRecord(Data_Argonaut_Encode_Class.gEncodeJsonCons(Data_Argonaut_Encode_Class.encodeJsonInt)(Data_Argonaut_Encode_Class.gEncodeJsonCons(Data_Argonaut_Encode_Class.encodeRecord(Data_Argonaut_Encode_Class.gEncodeJsonCons(Data_Argonaut_Encode_Class.encodeJsonInt)(Data_Argonaut_Encode_Class.gEncodeJsonCons(Data_Argonaut_Encode_Class.encodeJsonJString)(Data_Argonaut_Encode_Class.gEncodeJsonNil)(new Data_Symbol.IsSymbol(function () {
+                      return "name";
+                  }))())(new Data_Symbol.IsSymbol(function () {
+                      return "key";
+                  }))())())(Data_Argonaut_Encode_Class.gEncodeJsonNil)(new Data_Symbol.IsSymbol(function () {
+                      return "team";
+                  }))())(new Data_Symbol.IsSymbol(function () {
+                      return "score";
+                  }))())())({
+                      score: 0,
+                      team: v1.team
+                  }))))))(function (resp) {
+                      if (resp instanceof Data_Either.Left) {
+                          return Control_Monad_State_Class.put(Halogen_Query_HalogenM.monadStateHalogenM)(newState);
+                      };
+                      if (resp instanceof Data_Either.Right) {
+                          var v2 = Data_Argonaut_Decode_Class.decodeJson(Data_Argonaut_Decode_Class.decodeList(Data_Argonaut_Decode_Class.decodeRecord(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeJsonInt)(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeRecord(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeJsonInt)(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeJsonString)(Data_Argonaut_Decode_Class.gDecodeJsonNil)(new Data_Symbol.IsSymbol(function () {
+                              return "name";
+                          }))()())(new Data_Symbol.IsSymbol(function () {
+                              return "key";
+                          }))()())())(Data_Argonaut_Decode_Class.gDecodeJsonNil)(new Data_Symbol.IsSymbol(function () {
+                              return "team";
+                          }))()())(new Data_Symbol.IsSymbol(function () {
+                              return "score";
+                          }))()())()))(resp.value0.body);
+                          if (v2 instanceof Data_Either.Left) {
+                              return Control_Monad_State_Class.put(Halogen_Query_HalogenM.monadStateHalogenM)(newState);
                           };
-                          if (resp instanceof Data_Either.Right) {
-                              var v3 = Data_Argonaut_Decode_Class.decodeJson(Data_Argonaut_Decode_Class.decodeList(Data_Argonaut_Decode_Class.decodeRecord(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeJsonInt)(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeRecord(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeJsonInt)(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeJsonString)(Data_Argonaut_Decode_Class.gDecodeJsonNil)(new Data_Symbol.IsSymbol(function () {
-                                  return "name";
-                              }))()())(new Data_Symbol.IsSymbol(function () {
-                                  return "key";
-                              }))()())())(Data_Argonaut_Decode_Class.gDecodeJsonNil)(new Data_Symbol.IsSymbol(function () {
-                                  return "team";
-                              }))()())(new Data_Symbol.IsSymbol(function () {
-                                  return "score";
-                              }))()())()))(resp.value0.body);
-                              if (v3 instanceof Data_Either.Left) {
-                                  return Control_Monad_State_Class.put(Halogen_Query_HalogenM.monadStateHalogenM)(v2.newState);
-                              };
-                              if (v3 instanceof Data_Either.Right) {
-                                  return Control_Monad_State_Class.put(Halogen_Query_HalogenM.monadStateHalogenM)({
-                                      scores: v3.value0,
-                                      page: v2.newState.page,
-                                      questions: v2.newState.questions,
-                                      team: v2.newState.team
-                                  });
-                              };
-                              throw new Error("Failed pattern match at Quiz (line 115, column 29 - line 117, column 79): " + [ v3.constructor.name ]);
+                          if (v2 instanceof Data_Either.Right) {
+                              return Control_Monad_State_Class.put(Halogen_Query_HalogenM.monadStateHalogenM)({
+                                  scores: v2.value0,
+                                  page: newState.page,
+                                  questions: newState.questions,
+                                  team: newState.team
+                              });
                           };
-                          throw new Error("Failed pattern match at Quiz (line 112, column 25 - line 117, column 79): " + [ resp.constructor.name ]);
-                      });
-                  };
-                  throw new Error("Failed pattern match at Quiz (line 109, column 5 - line 117, column 79): " + [ v2.maybePoints.constructor.name ]);
+                          throw new Error("Failed pattern match at Quiz (line 114, column 9 - line 116, column 59): " + [ v2.constructor.name ]);
+                      };
+                      throw new Error("Failed pattern match at Quiz (line 111, column 5 - line 116, column 59): " + [ resp.constructor.name ]);
+                  });
               });
           };
           if (v instanceof ResponseEvent && v.value0 instanceof QuestionUI.SetResponse) {
@@ -12479,32 +12477,32 @@ var PS = {};
                   var newQuestions = trySetResponse(state.page)(v.value0.value0)(state.questions);
                   if (newQuestions instanceof Data_Maybe.Just) {
                       return Control_Monad_State_Class.put(Halogen_Query_HalogenM.monadStateHalogenM)((function () {
-                          var $49 = {};
-                          for (var $50 in state) {
-                              if ({}.hasOwnProperty.call(state, $50)) {
-                                  $49[$50] = state[$50];
+                          var $43 = {};
+                          for (var $44 in state) {
+                              if ({}.hasOwnProperty.call(state, $44)) {
+                                  $43[$44] = state[$44];
                               };
                           };
-                          $49.questions = newQuestions.value0;
-                          return $49;
+                          $43.questions = newQuestions.value0;
+                          return $43;
                       })());
                   };
                   if (newQuestions instanceof Data_Maybe.Nothing) {
                       return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(Data_Unit.unit);
                   };
-                  throw new Error("Failed pattern match at Quiz (line 123, column 5 - line 125, column 27): " + [ newQuestions.constructor.name ]);
+                  throw new Error("Failed pattern match at Quiz (line 122, column 5 - line 124, column 27): " + [ newQuestions.constructor.name ]);
               });
           };
           if (v instanceof Receive) {
               return Control_Monad_State_Class.modify_(Halogen_Query_HalogenM.monadStateHalogenM)(function (state) {
-                  var $55 = {};
-                  for (var $56 in state) {
-                      if ({}.hasOwnProperty.call(state, $56)) {
-                          $55[$56] = state[$56];
+                  var $49 = {};
+                  for (var $50 in state) {
+                      if ({}.hasOwnProperty.call(state, $50)) {
+                          $49[$50] = state[$50];
                       };
                   };
-                  $55.scores = v.value0.scores;
-                  return $55;
+                  $49.scores = v.value0.scores;
+                  return $49;
               });
           };
           throw new Error("Failed pattern match at Quiz (line 98, column 3 - line 98, column 98): " + [ v.constructor.name ]);
@@ -12515,8 +12513,8 @@ var PS = {};
           "eval": Halogen_Component.mkEval({
               handleAction: handleAction,
               handleQuery: Halogen_Component.defaultEval.handleQuery,
-              receive: function ($62) {
-                  return Data_Maybe.Just.create(Receive.create($62));
+              receive: function ($56) {
+                  return Data_Maybe.Just.create(Receive.create($56));
               },
               initialize: Halogen_Component.defaultEval.initialize,
               finalize: Halogen_Component.defaultEval.finalize
