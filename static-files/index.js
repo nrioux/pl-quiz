@@ -12439,7 +12439,7 @@ var PS = {};
                   }))())(new Data_Symbol.IsSymbol(function () {
                       return "score";
                   }))())())({
-                      score: 0,
+                      score: total,
                       team: v1.team
                   }))))))(function (resp) {
                       if (resp instanceof Data_Either.Left) {
