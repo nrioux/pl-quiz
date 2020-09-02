@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b5ad9803941ae6f6c6dee3ea267f3e0320ba2efe9d39d51037144b6b717ee338
+-- hash: 9073a2bdffa2b83237d9f66d5072079abe1633e02904e30665741b643e22d2c9
 
 name:           QuizServer
 version:        0.1.0.0
@@ -47,6 +47,7 @@ executable QuizServer-exe
       QuizServer
     , aeson
     , base >=4.7 && <5
+    , containers
     , directory
     , servant-server
     , stm
