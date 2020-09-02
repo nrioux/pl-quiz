@@ -11879,7 +11879,7 @@ var PS = {};
   })();
   var component = function (dictMonadAff) {
       var timer = Halogen_Query_EventSource.affEventSource(dictMonadAff)(function (emitter) {
-          return Control_Bind.bind(Effect_Aff.bindAff)(Effect_Aff.forkAff(Control_Monad_Rec_Class.forever(Effect_Aff.monadRecAff)(Control_Bind.discard(Control_Bind.discardUnit)(Effect_Aff.bindAff)(Effect_Aff.delay(30000.0))(function () {
+          return Control_Bind.bind(Effect_Aff.bindAff)(Effect_Aff.forkAff(Control_Monad_Rec_Class.forever(Effect_Aff.monadRecAff)(Control_Bind.discard(Control_Bind.discardUnit)(Effect_Aff.bindAff)(Effect_Aff.delay(10000.0))(function () {
               return Halogen_Query_EventSource.emit(emitter)(Tick.value);
           }))))(function (fiber) {
               return Control_Applicative.pure(Effect_Aff.applicativeAff)(Effect_Aff.killFiber(Effect_Exception.error("Event source finalized"))(fiber));
@@ -11941,7 +11941,7 @@ var PS = {};
               return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Effect_Class.liftEffect(Halogen_Query_HalogenM.monadEffectHalogenM(dictMonadAff.MonadEffect0()))(Effect_Console.log("TICK")))(function () {
                   return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Effect_Aff_Class.liftAff(Halogen_Query_HalogenM.monadAffHalogenM(dictMonadAff))(Affjax.get(Affjax_ResponseFormat.json)("/score")))(function (result) {
                       if (result instanceof Data_Either.Left) {
-                          return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(Data_Unit.unit);
+                          return Effect_Class.liftEffect(Halogen_Query_HalogenM.monadEffectHalogenM(dictMonadAff.MonadEffect0()))(Effect_Console.log("request failed"));
                       };
                       if (result instanceof Data_Either.Right) {
                           var decoded = Data_Argonaut_Decode_Class.decodeJson(Data_Argonaut_Decode_Class.decodeMap(Data_Ord.ordInt)(Data_Argonaut_Decode_Class.decodeJsonInt)(Data_Argonaut_Decode_Class.decodeRecord(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeJsonInt)(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeRecord(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeJsonInt)(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeJsonString)(Data_Argonaut_Decode_Class.gDecodeJsonNil)(new Data_Symbol.IsSymbol(function () {
@@ -11954,7 +11954,7 @@ var PS = {};
                               return "score";
                           }))()())()))(result.value0.body);
                           if (decoded instanceof Data_Either.Left) {
-                              return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(Data_Unit.unit);
+                              return Effect_Class.liftEffect(Halogen_Query_HalogenM.monadEffectHalogenM(dictMonadAff.MonadEffect0()))(Effect_Console.log("decode failed"));
                           };
                           if (decoded instanceof Data_Either.Right) {
                               return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Effect_Class.liftEffect(Halogen_Query_HalogenM.monadEffectHalogenM(dictMonadAff.MonadEffect0()))(Effect_Console.log("decoded response")))(function () {
