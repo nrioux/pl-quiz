@@ -11756,6 +11756,7 @@ var PS = {};
   var Data_Functor = $PS["Data.Functor"];
   var Data_Maybe = $PS["Data.Maybe"];
   var Data_Ord = $PS["Data.Ord"];
+  var Data_Show = $PS["Data.Show"];
   var Data_Symbol = $PS["Data.Symbol"];
   var Data_Unit = $PS["Data.Unit"];
   var Data_Void = $PS["Data.Void"];
@@ -11785,6 +11786,15 @@ var PS = {};
           return new ResponseEvent(value0);
       };
       return ResponseEvent;
+  })();
+  var Receive = (function () {
+      function Receive(value0) {
+          this.value0 = value0;
+      };
+      Receive.create = function (value0) {
+          return new Receive(value0);
+      };
+      return Receive;
   })();
   var trySetResponse = function (page) {
       return function (resp) {
@@ -11884,11 +11894,11 @@ var PS = {};
   var algos = Data_Array.sort(Data_Ord.ordString)(Data_Functor.map(Data_Functor.functorArray)(function (s) {
       return s.algorithm;
   })(samples));
-  var component = function (dictShow) {
+  var component = (function () {
       var render = function (v) {
           var scoreboard = Halogen_HTML.slot()(new Data_Symbol.IsSymbol(function () {
               return "scoreboard";
-          }))(Data_Ord.ordInt)(Data_Symbol.SProxy.value)(0)(Scoreboard.comp(dictShow))({
+          }))(Data_Ord.ordInt)(Data_Symbol.SProxy.value)(0)(Scoreboard.comp(Data_Show.showInt))({
               scores: v.scores
           })(Data_Void.absurd);
           var qui = Data_Maybe.fromMaybe(Halogen_HTML_Core.text("Error."))(Control_Bind.bind(Data_Maybe.bindMaybe)(Data_Array.index(v.questions)(v.page))(function (question) {
@@ -11899,8 +11909,8 @@ var PS = {};
                   question: question,
                   algos: algos,
                   langs: langs
-              })(function ($36) {
-                  return Data_Maybe.Just.create(ResponseEvent.create($36));
+              })(function ($41) {
+                  return Data_Maybe.Just.create(ResponseEvent.create($41));
               }));
           }));
           var nav = Halogen_HTML.slot()(new Data_Symbol.IsSymbol(function () {
@@ -11908,8 +11918,8 @@ var PS = {};
           }))(Data_Ord.ordInt)(Data_Symbol.SProxy.value)(0)(Nav.navComp)({
               page: v.page,
               questions: v.questions
-          })(function ($37) {
-              return Data_Maybe.Just.create(NavEvent.create($37));
+          })(function ($42) {
+              return Data_Maybe.Just.create(NavEvent.create($42));
           });
           return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("container") ])([ Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("row") ])([ Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("col-7") ])([ qui, scoreboard ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("col-5") ])([ Halogen_HTML_Elements.h2_([ Halogen_HTML_Core.text("Questions") ]), nav ]) ]) ]);
       };
@@ -11975,6 +11985,18 @@ var PS = {};
                   throw new Error("Failed pattern match at Quiz (line 105, column 5 - line 107, column 27): " + [ newQuestions.constructor.name ]);
               });
           };
+          if (v instanceof Receive) {
+              return Control_Monad_State_Class.modify_(Halogen_Query_HalogenM.monadStateHalogenM)(function (state) {
+                  var $36 = {};
+                  for (var $37 in state) {
+                      if ({}.hasOwnProperty.call(state, $37)) {
+                          $36[$37] = state[$37];
+                      };
+                  };
+                  $36.scores = v.value0.scores;
+                  return $36;
+              });
+          };
           throw new Error("Failed pattern match at Quiz (line 93, column 3 - line 93, column 98): " + [ v.constructor.name ]);
       };
       return Halogen_Component.mkComponent({
@@ -11983,12 +12005,14 @@ var PS = {};
           "eval": Halogen_Component.mkEval({
               handleAction: handleAction,
               handleQuery: Halogen_Component.defaultEval.handleQuery,
-              receive: Halogen_Component.defaultEval.receive,
+              receive: function ($43) {
+                  return Data_Maybe.Just.create(Receive.create($43));
+              },
               initialize: Halogen_Component.defaultEval.initialize,
               finalize: Halogen_Component.defaultEval.finalize
           })
       });
-  };
+  })();
   exports["component"] = component;
 })(PS);
 (function($PS) {
@@ -12071,7 +12095,7 @@ var PS = {};
           };
           var quiz = Halogen_HTML.slot()(new Data_Symbol.IsSymbol(function () {
               return "quiz";
-          }))(Data_Ord.ordInt)(Data_Symbol.SProxy.value)(0)(Quiz.component(Data_Show.showInt))({
+          }))(Data_Ord.ordInt)(Data_Symbol.SProxy.value)(0)(Quiz.component)({
               id: v.id,
               name: v.name,
               scores: v.scores
