@@ -11532,7 +11532,8 @@ var PS = {};
   var Data_Show = $PS["Data.Show"];
   var Halogen_Component = $PS["Halogen.Component"];
   var Halogen_HTML_Core = $PS["Halogen.HTML.Core"];
-  var Halogen_HTML_Elements = $PS["Halogen.HTML.Elements"];                
+  var Halogen_HTML_Elements = $PS["Halogen.HTML.Elements"];
+  var Halogen_HTML_Properties = $PS["Halogen.HTML.Properties"];                
   var comp = function (dictShow) {
       var render = function (v) {
           var renderRow = function (i) {
@@ -11541,7 +11542,7 @@ var PS = {};
               };
           };
           var rows = Data_Array.fromFoldable(Data_List_Types.foldableList)(Data_List.mapWithIndex(renderRow)(v.scores));
-          return Halogen_HTML_Elements.div_([ Halogen_HTML_Elements.h2_([ Halogen_HTML_Core.text("Leaderboard") ]), Halogen_HTML_Elements.table_(Data_Semigroup.append(Data_Semigroup.semigroupArray)([ Halogen_HTML_Elements.tr_([ Halogen_HTML_Elements.th_([ Halogen_HTML_Core.text("Rank") ]), Halogen_HTML_Elements.th_([ Halogen_HTML_Core.text("Team") ]), Halogen_HTML_Elements.th_([ Halogen_HTML_Core.text("Score") ]) ]) ])(rows)) ]);
+          return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("mt-3") ])([ Halogen_HTML_Elements.h2_([ Halogen_HTML_Core.text("Leaderboard") ]), Halogen_HTML_Elements.table_(Data_Semigroup.append(Data_Semigroup.semigroupArray)([ Halogen_HTML_Elements.tr_([ Halogen_HTML_Elements.th_([ Halogen_HTML_Core.text("Rank") ]), Halogen_HTML_Elements.th_([ Halogen_HTML_Core.text("Team") ]), Halogen_HTML_Elements.th_([ Halogen_HTML_Core.text("Score") ]) ]) ])(rows)) ]);
       };
       var initialState = function (s) {
           return s;
@@ -11567,10 +11568,8 @@ var PS = {};
   var Data_EuclideanRing = $PS["Data.EuclideanRing"];
   var Data_FoldableWithIndex = $PS["Data.FoldableWithIndex"];
   var Data_Functor = $PS["Data.Functor"];
-  var Data_List_Types = $PS["Data.List.Types"];
   var Data_Maybe = $PS["Data.Maybe"];
   var Data_Ord = $PS["Data.Ord"];
-  var Data_Show = $PS["Data.Show"];
   var Data_Symbol = $PS["Data.Symbol"];
   var Data_Unit = $PS["Data.Unit"];
   var Data_Void = $PS["Data.Void"];
@@ -11605,8 +11604,8 @@ var PS = {};
       return function (resp) {
           return function (questions) {
               return Data_Array.modifyAt(page)(function (oldQuestion) {
-                  var $9 = Common.submitted(oldQuestion);
-                  if ($9) {
+                  var $10 = Common.submitted(oldQuestion);
+                  if ($10) {
                       return oldQuestion;
                   };
                   return {
@@ -11639,8 +11638,8 @@ var PS = {};
                       return function (q) {
                           var relBestIdx = Data_EuclideanRing.mod(Data_EuclideanRing.euclideanRingInt)((best.idx - page | 0) - 1 | 0)(Data_Array.length(questions));
                           var relIdx = Data_EuclideanRing.mod(Data_EuclideanRing.euclideanRingInt)((i - page | 0) - 1 | 0)(Data_Array.length(questions));
-                          var $10 = Common.submitted(q) || relBestIdx <= relIdx;
-                          if ($10) {
+                          var $11 = Common.submitted(q) || relBestIdx <= relIdx;
+                          if ($11) {
                               return best;
                           };
                           return {
@@ -11699,11 +11698,11 @@ var PS = {};
   var algos = Data_Array.sort(Data_Ord.ordString)(Data_Functor.map(Data_Functor.functorArray)(function (s) {
       return s.algorithm;
   })(samples));
-  var component = (function () {
+  var component = function (dictShow) {
       var render = function (v) {
           var scoreboard = Halogen_HTML.slot()(new Data_Symbol.IsSymbol(function () {
               return "scoreboard";
-          }))(Data_Ord.ordInt)(Data_Symbol.SProxy.value)(0)(Scoreboard.comp(Data_Show.showInt))({
+          }))(Data_Ord.ordInt)(Data_Symbol.SProxy.value)(0)(Scoreboard.comp(dictShow))({
               scores: v.scores
           })(Data_Void.absurd);
           var qui = Data_Maybe.fromMaybe(Halogen_HTML_Core.text("Error."))(Control_Bind.bind(Data_Maybe.bindMaybe)(Data_Array.index(v.questions)(v.page))(function (question) {
@@ -11714,8 +11713,8 @@ var PS = {};
                   question: question,
                   algos: algos,
                   langs: langs
-              })(function ($33) {
-                  return Data_Maybe.Just.create(ResponseEvent.create($33));
+              })(function ($36) {
+                  return Data_Maybe.Just.create(ResponseEvent.create($36));
               }));
           }));
           var nav = Halogen_HTML.slot()(new Data_Symbol.IsSymbol(function () {
@@ -11723,8 +11722,8 @@ var PS = {};
           }))(Data_Ord.ordInt)(Data_Symbol.SProxy.value)(0)(Nav.navComp)({
               page: v.page,
               questions: v.questions
-          })(function ($34) {
-              return Data_Maybe.Just.create(NavEvent.create($34));
+          })(function ($37) {
+              return Data_Maybe.Just.create(NavEvent.create($37));
           });
           return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("container") ])([ Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("row") ])([ Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("col-7") ])([ qui, scoreboard ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("col-5") ])([ Halogen_HTML_Elements.h2_([ Halogen_HTML_Core.text("Questions") ]), nav ]) ]) ]);
       };
@@ -11732,20 +11731,20 @@ var PS = {};
           return {
               page: 0,
               questions: initialQuestions,
-              scores: Data_List_Types.Nil.value
+              scores: v.scores
           };
       };
       var handleAction = function (v) {
           if (v instanceof NavEvent) {
               return Control_Monad_State_Class.modify_(Halogen_Query_HalogenM.monadStateHalogenM)(function (state) {
-                  var $16 = {};
-                  for (var $17 in state) {
-                      if ({}.hasOwnProperty.call(state, $17)) {
-                          $16[$17] = state[$17];
+                  var $19 = {};
+                  for (var $20 in state) {
+                      if ({}.hasOwnProperty.call(state, $20)) {
+                          $19[$20] = state[$20];
                       };
                   };
-                  $16.page = v.value0.value0;
-                  return $16;
+                  $19.page = v.value0.value0;
+                  return $19;
               });
           };
           if (v instanceof ResponseEvent && v.value0 instanceof QuestionUI.Submit) {
@@ -11774,23 +11773,23 @@ var PS = {};
                   var newQuestions = trySetResponse(state.page)(v.value0.value0)(state.questions);
                   if (newQuestions instanceof Data_Maybe.Just) {
                       return Control_Monad_State_Class.put(Halogen_Query_HalogenM.monadStateHalogenM)((function () {
-                          var $27 = {};
-                          for (var $28 in state) {
-                              if ({}.hasOwnProperty.call(state, $28)) {
-                                  $27[$28] = state[$28];
+                          var $30 = {};
+                          for (var $31 in state) {
+                              if ({}.hasOwnProperty.call(state, $31)) {
+                                  $30[$31] = state[$31];
                               };
                           };
-                          $27.questions = newQuestions.value0;
-                          return $27;
+                          $30.questions = newQuestions.value0;
+                          return $30;
                       })());
                   };
                   if (newQuestions instanceof Data_Maybe.Nothing) {
                       return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(Data_Unit.unit);
                   };
-                  throw new Error("Failed pattern match at Quiz (line 104, column 5 - line 106, column 27): " + [ newQuestions.constructor.name ]);
+                  throw new Error("Failed pattern match at Quiz (line 105, column 5 - line 107, column 27): " + [ newQuestions.constructor.name ]);
               });
           };
-          throw new Error("Failed pattern match at Quiz (line 92, column 3 - line 92, column 98): " + [ v.constructor.name ]);
+          throw new Error("Failed pattern match at Quiz (line 93, column 3 - line 93, column 98): " + [ v.constructor.name ]);
       };
       return Halogen_Component.mkComponent({
           initialState: initialState,
@@ -11803,7 +11802,7 @@ var PS = {};
               finalize: Halogen_Component.defaultEval.finalize
           })
       });
-  })();
+  };
   exports["component"] = component;
 })(PS);
 (function($PS) {
@@ -11826,6 +11825,7 @@ var PS = {};
   var Data_Map_Internal = $PS["Data.Map.Internal"];
   var Data_Maybe = $PS["Data.Maybe"];
   var Data_Ord = $PS["Data.Ord"];
+  var Data_Show = $PS["Data.Show"];
   var Data_Symbol = $PS["Data.Symbol"];
   var Data_Unit = $PS["Data.Unit"];
   var Data_Void = $PS["Data.Void"];
@@ -11876,15 +11876,16 @@ var PS = {};
       });
       var render = function (v) {
           if (!v.joined) {
-              return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("container") ])([ Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("row") ])([ Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("col-7") ])([ Halogen_HTML_Elements.h2_([ Halogen_HTML_Core.text("Join Game") ]), Halogen_HTML_Elements.form([ Halogen_HTML_Events.onSubmit(Data_Function["const"](new Data_Maybe.Just(Join.value))), Halogen_HTML_Properties.action("#") ])([ Halogen_HTML_Elements.label_([ Halogen_HTML_Core.text("Group Name: "), Halogen_HTML_Elements.input([ Halogen_HTML_Properties.type_(Halogen_HTML_Core.isPropInputType)(DOM_HTML_Indexed_InputType.InputText.value), Halogen_HTML_Events.onValueInput(function ($29) {
-                  return Data_Maybe.Just.create(SetName.create($29));
+              return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("container") ])([ Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("row") ])([ Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("col-7") ])([ Halogen_HTML_Elements.h2_([ Halogen_HTML_Core.text("Join Game") ]), Halogen_HTML_Elements.form([ Halogen_HTML_Events.onSubmit(Data_Function["const"](new Data_Maybe.Just(Join.value))), Halogen_HTML_Properties.action("#") ])([ Halogen_HTML_Elements.label_([ Halogen_HTML_Core.text("Group Name: "), Halogen_HTML_Elements.input([ Halogen_HTML_Properties.type_(Halogen_HTML_Core.isPropInputType)(DOM_HTML_Indexed_InputType.InputText.value), Halogen_HTML_Events.onValueInput(function ($30) {
+                  return Data_Maybe.Just.create(SetName.create($30));
               }) ]) ]), Halogen_HTML_Elements.br_, Halogen_HTML_Elements.button([ Halogen_HTML_Properties.classes([ "btn", "btn-primary" ]), Halogen_HTML_Properties.type_(Halogen_HTML_Core.isPropButtonType)(DOM_HTML_Indexed_ButtonType.ButtonSubmit.value) ])([ Halogen_HTML_Core.text("Join") ]) ]) ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("col-5") ])([  ]) ]) ]);
           };
           var quiz = Halogen_HTML.slot()(new Data_Symbol.IsSymbol(function () {
               return "quiz";
-          }))(Data_Ord.ordInt)(Data_Symbol.SProxy.value)(0)(Quiz.component)({
+          }))(Data_Ord.ordInt)(Data_Symbol.SProxy.value)(0)(Quiz.component(Data_Show.showInt))({
               id: v.id,
-              name: v.name
+              name: v.name,
+              scores: v.scores
           })(Data_Void.absurd);
           return quiz;
       };
@@ -11899,29 +11900,29 @@ var PS = {};
       var handleAction = function (v) {
           if (v instanceof SetName) {
               return Control_Monad_State_Class.modify_(Halogen_Query_HalogenM.monadStateHalogenM)(function (state) {
-                  var $13 = {};
-                  for (var $14 in state) {
-                      if ({}.hasOwnProperty.call(state, $14)) {
-                          $13[$14] = state[$14];
+                  var $14 = {};
+                  for (var $15 in state) {
+                      if ({}.hasOwnProperty.call(state, $15)) {
+                          $14[$15] = state[$15];
                       };
                   };
-                  $13.name = v.value0;
-                  return $13;
+                  $14.name = v.value0;
+                  return $14;
               });
           };
           if (v instanceof Join) {
               return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.modify_(Halogen_Query_HalogenM.monadStateHalogenM)(function (state) {
-                  var $17 = {};
-                  for (var $18 in state) {
-                      if ({}.hasOwnProperty.call(state, $18)) {
-                          $17[$18] = state[$18];
+                  var $18 = {};
+                  for (var $19 in state) {
+                      if ({}.hasOwnProperty.call(state, $19)) {
+                          $18[$19] = state[$19];
                       };
                   };
-                  $17.joined = true;
-                  return $17;
+                  $18.joined = true;
+                  return $18;
               }))(function () {
                   return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Halogen_Query_HalogenM.subscribe(timer))(function () {
-                      return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(Data_Unit.unit);
+                      return Halogen_Query_HalogenM.raise(Tick.value);
                   });
               });
           };
@@ -11945,14 +11946,14 @@ var PS = {};
                       };
                       if (decoded instanceof Data_Either.Right) {
                           return Control_Monad_State_Class.modify_(Halogen_Query_HalogenM.monadStateHalogenM)(function (state) {
-                              var $24 = {};
-                              for (var $25 in state) {
-                                  if ({}.hasOwnProperty.call(state, $25)) {
-                                      $24[$25] = state[$25];
+                              var $25 = {};
+                              for (var $26 in state) {
+                                  if ({}.hasOwnProperty.call(state, $26)) {
+                                      $25[$26] = state[$26];
                                   };
                               };
-                              $24.scores = Data_Map_Internal.values(decoded.value0);
-                              return $24;
+                              $25.scores = Data_Map_Internal.values(decoded.value0);
+                              return $25;
                           });
                       };
                       throw new Error("Failed pattern match at Main (line 86, column 9 - line 88, column 106): " + [ decoded.constructor.name ]);
