@@ -5324,6 +5324,19 @@ var PS = {};
       };
       return Submitted;
   })();
+  var totalScore = function (questions) {
+      return Data_Foldable.foldl(Data_Foldable.foldableArray)(function (sum) {
+          return function (q) {
+              if (q.status instanceof Unsubmitted) {
+                  return sum;
+              };
+              if (q.status instanceof Submitted) {
+                  return sum + q.status.value0.points | 0;
+              };
+              throw new Error("Failed pattern match at Common (line 23, column 38 - line 25, column 76): " + [ q.status.constructor.name ]);
+          };
+      })(0)(questions);
+  };
   var submitted = function (v) {
       if (v.status instanceof Unsubmitted) {
           return false;
@@ -5336,28 +5349,21 @@ var PS = {};
   var score = function (response) {
       return function (sample) {
           var algo = (function () {
-              var $5 = sample.algorithm === response.algorithm;
-              if ($5) {
+              var $8 = sample.algorithm === response.algorithm;
+              if ($8) {
                   return 1;
               };
               return 0;
           })();
           var lang = (function () {
-              var $6 = sample.language === response.language;
-              if ($6) {
+              var $9 = sample.language === response.language;
+              if ($9) {
                   return 1;
               };
               return 0;
           })();
           return algo + lang | 0;
       };
-  };
-  var totalScore = function (questions) {
-      return Data_Foldable.foldl(Data_Foldable.foldableArray)(function (sum) {
-          return function (q) {
-              return sum + score(q.response)(q.sample) | 0;
-          };
-      })(0)(questions);
   };
   exports["Unsubmitted"] = Unsubmitted;
   exports["Submitted"] = Submitted;
@@ -7887,7 +7893,6 @@ var PS = {};
   };
   exports["decodeInt"] = decodeInt;
   exports["decodeString"] = decodeString;
-  exports["decodeList"] = decodeList;
   exports["decodeMap"] = decodeMap;
 })(PS);
 (function($PS) {
@@ -7971,9 +7976,6 @@ var PS = {};
   var decodeJson = function (dict) {
       return dict.decodeJson;
   };
-  var decodeList = function (dictDecodeJson) {
-      return new DecodeJson(Data_Argonaut_Decode_Decoders.decodeList(decodeJson(dictDecodeJson)));
-  };
   var decodeMap = function (dictOrd) {
       return function (dictDecodeJson) {
           return function (dictDecodeJson1) {
@@ -8011,7 +8013,6 @@ var PS = {};
   exports["decodeJson"] = decodeJson;
   exports["decodeJsonInt"] = decodeJsonInt;
   exports["decodeJsonString"] = decodeJsonString;
-  exports["decodeList"] = decodeList;
   exports["decodeMap"] = decodeMap;
   exports["decodeRecord"] = decodeRecord;
   exports["gDecodeJsonNil"] = gDecodeJsonNil;
@@ -12216,6 +12217,7 @@ var PS = {};
   var Data_EuclideanRing = $PS["Data.EuclideanRing"];
   var Data_FoldableWithIndex = $PS["Data.FoldableWithIndex"];
   var Data_Functor = $PS["Data.Functor"];
+  var Data_Map_Internal = $PS["Data.Map.Internal"];
   var Data_Maybe = $PS["Data.Maybe"];
   var Data_Ord = $PS["Data.Ord"];
   var Data_Symbol = $PS["Data.Symbol"];
@@ -12446,7 +12448,7 @@ var PS = {};
                           return Control_Monad_State_Class.put(Halogen_Query_HalogenM.monadStateHalogenM)(newState);
                       };
                       if (resp instanceof Data_Either.Right) {
-                          var v2 = Data_Argonaut_Decode_Class.decodeJson(Data_Argonaut_Decode_Class.decodeList(Data_Argonaut_Decode_Class.decodeRecord(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeJsonInt)(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeRecord(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeJsonInt)(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeJsonString)(Data_Argonaut_Decode_Class.gDecodeJsonNil)(new Data_Symbol.IsSymbol(function () {
+                          var v2 = Data_Argonaut_Decode_Class.decodeJson(Data_Argonaut_Decode_Class.decodeMap(Data_Ord.ordInt)(Data_Argonaut_Decode_Class.decodeJsonInt)(Data_Argonaut_Decode_Class.decodeRecord(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeJsonInt)(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeRecord(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeJsonInt)(Data_Argonaut_Decode_Class.gDecodeJsonCons(Data_Argonaut_Decode_Class.decodeJsonString)(Data_Argonaut_Decode_Class.gDecodeJsonNil)(new Data_Symbol.IsSymbol(function () {
                               return "name";
                           }))()())(new Data_Symbol.IsSymbol(function () {
                               return "key";
@@ -12460,15 +12462,15 @@ var PS = {};
                           };
                           if (v2 instanceof Data_Either.Right) {
                               return Control_Monad_State_Class.put(Halogen_Query_HalogenM.monadStateHalogenM)({
-                                  scores: v2.value0,
+                                  scores: Data_Map_Internal.values(v2.value0),
                                   page: newState.page,
                                   questions: newState.questions,
                                   team: newState.team
                               });
                           };
-                          throw new Error("Failed pattern match at Quiz (line 114, column 9 - line 116, column 59): " + [ v2.constructor.name ]);
+                          throw new Error("Failed pattern match at Quiz (line 115, column 9 - line 117, column 93): " + [ v2.constructor.name ]);
                       };
-                      throw new Error("Failed pattern match at Quiz (line 111, column 5 - line 116, column 59): " + [ resp.constructor.name ]);
+                      throw new Error("Failed pattern match at Quiz (line 112, column 5 - line 117, column 93): " + [ resp.constructor.name ]);
                   });
               });
           };
@@ -12490,7 +12492,7 @@ var PS = {};
                   if (newQuestions instanceof Data_Maybe.Nothing) {
                       return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(Data_Unit.unit);
                   };
-                  throw new Error("Failed pattern match at Quiz (line 122, column 5 - line 124, column 27): " + [ newQuestions.constructor.name ]);
+                  throw new Error("Failed pattern match at Quiz (line 123, column 5 - line 125, column 27): " + [ newQuestions.constructor.name ]);
               });
           };
           if (v instanceof Receive) {
@@ -12505,7 +12507,7 @@ var PS = {};
                   return $49;
               });
           };
-          throw new Error("Failed pattern match at Quiz (line 98, column 3 - line 98, column 98): " + [ v.constructor.name ]);
+          throw new Error("Failed pattern match at Quiz (line 99, column 3 - line 99, column 98): " + [ v.constructor.name ]);
       };
       return Halogen_Component.mkComponent({
           initialState: initialState,
