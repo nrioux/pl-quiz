@@ -12665,7 +12665,7 @@ var PS = {};
   })();
   var component = function (dictMonadAff) {
       var timer = Halogen_Query_EventSource.affEventSource(dictMonadAff)(function (emitter) {
-          return Control_Bind.bind(Effect_Aff.bindAff)(Effect_Aff.forkAff(Control_Monad_Rec_Class.forever(Effect_Aff.monadRecAff)(Control_Bind.discard(Control_Bind.discardUnit)(Effect_Aff.bindAff)(Effect_Aff.delay(10000.0))(function () {
+          return Control_Bind.bind(Effect_Aff.bindAff)(Effect_Aff.forkAff(Control_Monad_Rec_Class.forever(Effect_Aff.monadRecAff)(Control_Bind.discard(Control_Bind.discardUnit)(Effect_Aff.bindAff)(Effect_Aff.delay(20000.0))(function () {
               return Halogen_Query_EventSource.emit(emitter)(Tick.value);
           }))))(function (fiber) {
               return Control_Applicative.pure(Effect_Aff.applicativeAff)(Effect_Aff.killFiber(Effect_Exception.error("Event source finalized"))(fiber));
