@@ -4,6 +4,10 @@
 
 module Main where
 
+import Control.Concurrent.STM.TVar
+import Control.Monad.IO.Class (liftIO)
+import Control.Monad.STM (atomically)
+import Control.Monad.Trans.Reader  (ReaderT, ask, runReaderT)
 import Data.Aeson
 import GHC.Generics
 import Network.Wai
@@ -26,32 +30,44 @@ data Scoreboard = Scoreboard { entries :: [Score] }
   deriving (Eq, Show, Generic)
 instance ToJSON Scoreboard
 
+data ServerState = ServerState (TVar Scoreboard)
+type AppM = ReaderT ServerState Handler
+
 type ScoreAPI = "score" :> Get '[JSON] Scoreboard
-scoreServer :: Server ScoreAPI
-scoreServer = return Scoreboard { entries = [] }
+scoreServer :: ServerT ScoreAPI AppM
+scoreServer = do
+  ServerState boardptr <- ask
+  board <- liftIO $ atomically $ readTVar boardptr
+  return board
 
 type StaticAPI = Raw
 
 type QuizAPI = ScoreAPI :<|> StaticAPI
 
+
 quizAPI :: Proxy QuizAPI
 quizAPI = Proxy
 
 
-staticServer :: Server StaticAPI
+staticServer :: ServerT StaticAPI AppM
 staticServer = serveDirectoryFileServer "/app/static-files"
 
-server :: Server QuizAPI
+server :: ServerT QuizAPI AppM
 server = scoreServer :<|> staticServer
 
-app :: Application
-app = serve quizAPI server
+
+appToHandler :: ServerState -> AppM a -> Handler a
+appToHandler s m = runReaderT m s
+
+app :: ServerState -> Application
+app s = serve quizAPI $ hoistServer quizAPI (appToHandler s) server
 
 main :: IO ()
 main = do
   cd <- getCurrentDirectory
   portStr <- getEnv "PORT"
+  board <- atomically $ newTVar $ Scoreboard { entries = [] }
   let port = read portStr
   putStrLn $ "CD: " ++ cd
   putStrLn $ "Running server: http://localhost:" ++ (show port)
-  run port app
+  run port (app $ ServerState board)

@@ -42,6 +42,8 @@ executables:
     - warp
     - directory
     - aeson
+    - stm
+    - transformers
 
 tests:
   QuizServer-test:
