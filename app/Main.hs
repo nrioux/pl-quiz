@@ -42,7 +42,7 @@ data ServerState = ServerState (TVar Scoreboard)
 type AppM = ReaderT ServerState Handler
 
 type GetScore = Get '[JSON] Scoreboard
-type AddScore = ReqBody '[JSON] Score :> Post '[JSON] ()
+type AddScore = ReqBody '[JSON] Score :> Post '[JSON] Scoreboard
 
 type ScoreAPI = "score" :> (GetScore :<|> AddScore)
 scoreServer :: ServerT ScoreAPI AppM
@@ -56,6 +56,7 @@ scoreServer = getScore :<|> addScore
       board <- readTVar boardptr
       let board' = insertScore score board
       writeTVar boardptr board'
+      pure board'
 
 type StaticAPI = Raw
 
