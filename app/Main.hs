@@ -29,11 +29,14 @@ data Score = Score { score :: Int, team :: Team }
 instance ToJSON Score
 instance FromJSON Score
 
-type Scoreboard = Map.Map Int Score
+newtype Scoreboard = Scoreboard (Map.Map Int Score)
+
+instance ToJSON Scoreboard where
+  toJSON (Scoreboard board) = toJSON $ Map.toList board
 
 insertScore :: Score -> Scoreboard -> Scoreboard
-insertScore score board =
-  Map.insert (key $ team score) score board
+insertScore score (Scoreboard board) =
+  Scoreboard $ Map.insert (key $ team score) score board
 
 data ServerState = ServerState (TVar Scoreboard)
 type AppM = ReaderT ServerState Handler
@@ -80,7 +83,7 @@ main :: IO ()
 main = do
   cd <- getCurrentDirectory
   portStr <- getEnv "PORT"
-  board <- atomically $ newTVar $ Map.singleton 0 Score { score = 10, team = Team { key = 1, name = "Green Team" } }
+  board <- atomically $ newTVar $ Scoreboard $ Map.singleton 0 Score { score = 10, team = Team { key = 1, name = "Green Team" } }
   let port = read portStr
   putStrLn $ "CD: " ++ cd
   putStrLn $ "Running server: http://localhost:" ++ (show port)
