@@ -12418,8 +12418,8 @@ var PS = {};
       return s.language;
   })(Samples.samples));
   var initialResponse = {
-      algorithm: "Burrito",
-      language: "Delphi"
+      algorithm: "Ackermann function",
+      language: "C"
   };
   var initialQuestions = Data_Functor.map(Data_Functor.functorArray)(function (sample) {
       return {
