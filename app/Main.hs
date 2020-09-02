@@ -84,7 +84,7 @@ main :: IO ()
 main = do
   cd <- getCurrentDirectory
   portStr <- getEnv "PORT"
-  board <- atomically $ newTVar $ Scoreboard $ Map.singleton 0 Score { score = 10, team = Team { key = 1, name = "Green Team" } }
+  board <- atomically $ newTVar $ Scoreboard $ Map.empty
   let port = read portStr
   putStrLn $ "CD: " ++ cd
   putStrLn $ "Running server: http://localhost:" ++ (show port)
